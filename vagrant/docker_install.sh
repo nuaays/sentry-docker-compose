@@ -15,3 +15,13 @@ pip install docker-compose
 groupadd docker
 gpasswd -a vagrant docker
 service docker restart
+
+SENTRY_SECRET_KEY="`python -c 'import random; import string; print "".join([random.SystemRandom().choice(string.digits + string.letters) for i in range(64)])'`"
+echo export SENTRY_SECRET_KEY="${SENTRY_SECRET_KEY}" >> /etc/environment
+POSTGRES_PASSWORD="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}`"
+echo export POSTGRES_PASSWORD="${POSTGRES_PASSWORD}" >> /etc/environment
+
+source /etc/environment
+
+cd /vagrant
+docker-compose up -d

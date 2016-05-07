@@ -5,11 +5,12 @@ DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -
 apt-get autoremove -y
 
 apt-get install language-pack-en -y
-
-export LANGUAGE=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
 locale-gen en_US.UTF-8
+echo "export LANGUAGE=en_US.UTF-8" >> /etc/environment
+echo "export LANG=en_US.UTF-8" >> /etc/environment
+echo "export LC_ALL=en_US.UTF-8" >> /etc/environment
+source /etc/environment
+
 dpkg-reconfigure locales
 
 apt-get install mc -y
