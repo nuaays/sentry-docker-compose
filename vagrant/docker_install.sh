@@ -20,6 +20,8 @@ SENTRY_SECRET_KEY="`python -c 'import random; import string; print "".join([rand
 echo export SENTRY_SECRET_KEY="${SENTRY_SECRET_KEY}" >> /etc/environment
 POSTGRES_PASSWORD="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}`"
 echo export POSTGRES_PASSWORD="${POSTGRES_PASSWORD}" >> /etc/environment
+RABBIT_PASSWORD="`< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}`"
+echo export RABBIT_PASSWORD="${RABBIT_PASSWORD}" >> /etc/environment
 
 source /etc/environment
 

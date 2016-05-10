@@ -2,10 +2,12 @@ version: '2'
 services:
 
   sentry-redis:
+    restart: always
     image: redis
     container_name: "sentry-redis"
 
   sentry-postgres:
+    restart: always
     image: postgres
     container_name: "sentry-postgres"
     environment:
@@ -16,10 +18,22 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  sentry-rabbitmq:
+    restart: always
+    image: rabbitmq
+    container_name: "sentryrabbit"
+    environment:
+        - RABBITMQ_DEFAULT_USER=sentry
+        - RABBITMQ_DEFAULT_PASS=${RABBIT_PASSWORD}
+
   sentry:
+    restart: always
     image: sentry
     container_name: "sentry"
     environment:
+      - SENTRY_RABBITMQ_HOST=rabbitmq
+      - SENTRY_RABBITMQ_USERNAME=sentry
+      - SENTRY_RABBITMQ_PASSWORD=${RABBIT_PASSWORD}
       - SENTRY_REDIS_HOST=redis
       - SENTRY_POSTGRES_HOST=postgres
       - SENTRY_DB_NAME=sentry
@@ -29,13 +43,18 @@ services:
     links:
       - sentry-redis:redis
       - sentry-postgres:postgres
+      - sentry-rabbitmq:rabbitmq
     ports:
       - 9000:9000
 
   celery-beat:
+    restart: always
     image: sentry
     container_name: "celery-beat"
     environment:
+      - SENTRY_RABBITMQ_HOST=rabbitmq
+      - SENTRY_RABBITMQ_USERNAME=sentry
+      - SENTRY_RABBITMQ_PASSWORD=${RABBIT_PASSWORD}
       - SENTRY_REDIS_HOST=redis
       - SENTRY_POSTGRES_HOST=postgres
       - SENTRY_DB_NAME=sentry
@@ -45,12 +64,17 @@ services:
     links:
       - sentry-redis:redis
       - sentry-postgres:postgres
+      - sentry-rabbitmq:rabbitmq
     command: sentry celery beat
 
   celery-worker:
+    restart: always
     image: sentry
     container_name: "celery-worker"
     environment:
+      - SENTRY_RABBITMQ_HOST=rabbitmq
+      - SENTRY_RABBITMQ_USERNAME=sentry
+      - SENTRY_RABBITMQ_PASSWORD=${RABBIT_PASSWORD}
       - SENTRY_REDIS_HOST=redis
       - SENTRY_POSTGRES_HOST=postgres
       - SENTRY_DB_NAME=sentry
@@ -60,6 +84,7 @@ services:
     links:
       - sentry-redis:redis
       - sentry-postgres:postgres
+      - sentry-rabbitmq:rabbitmq
     command: sentry celery worker
 
 volumes:
